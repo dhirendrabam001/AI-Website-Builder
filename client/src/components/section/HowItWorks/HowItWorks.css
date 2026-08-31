@@ -1,0 +1,81 @@
+.hiw {
+  overflow: hidden;
+}
+
+.hiw-glow {
+  width: 520px;
+  height: 520px;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.55;
+}
+
+.hiw-grid-wrap {
+  position: relative;
+}
+
+/* connecting line behind the cards */
+.hiw-line {
+  position: absolute;
+  top: 62px;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.hiw-line-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #4d7cff, #a855f7);
+  box-shadow: 0 0 14px rgba(93, 110, 255, 0.7);
+}
+
+.hiw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  position: relative;
+}
+
+.hiw-card {
+  padding: 26px;
+  border-radius: var(--r-lg);
+}
+
+.hiw-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hiw-no {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.13);
+}
+
+.hiw-title {
+  margin-top: 20px;
+}
+
+.hiw-text {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+@media (max-width: 900px) {
+  .hiw-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .hiw-line {
+    display: none;
+  }
+}
