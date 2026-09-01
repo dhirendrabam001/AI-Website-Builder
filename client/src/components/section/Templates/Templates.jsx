@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, ArrowRight } from "lucide-react";
+import { Eye, ArrowRight, LayoutTemplate } from "lucide-react";
 import Reveal, { RevealGroup, revealChild } from "../../ui/Reveal";
 import "./Templates.css";
 
@@ -51,7 +51,10 @@ export default function Templates() {
     <section className="section templates" id="templates">
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">Templates</span>
+          <span className="badge-pill">
+            <LayoutTemplate size={14} strokeWidth={2.2} />
+            Templates
+          </span>
           <h2 className="h-section mt-3">
             Start from scratch, or from a{" "}
             <span className="grad-text">head start</span>.

@@ -1,4 +1,5 @@
-import { ArrowUpRight, AtSign, MessageCircle, Send, Sparkles } from "lucide-react";
+import { ArrowUpRight, AtSign, MessageCircle, Send } from "lucide-react";
+import logo from "../../assets/Images/logo.png";
 import "./Footer.css";
 
 const GROUPS = [
@@ -14,7 +15,7 @@ export default function Footer() {
       <div className="shell footer-main">
         <div className="footer-brand">
           <a href="#top" className="nav-logo" aria-label="AI Builder home">
-            <span className="nav-logo-mark"><Sparkles size={16} strokeWidth={2.2} /></span>
+            <span className="nav-logo-mark"><img src={logo} alt="" /></span>
             <span className="nav-logo-text">AI Builder</span>
           </a>
           <p>From your first thought to a live website, without the busywork in between.</p>

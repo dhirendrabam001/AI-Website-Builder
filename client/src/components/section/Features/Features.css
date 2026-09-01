@@ -13,12 +13,142 @@
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  gap: 22px 18px;
+  perspective: 1400px;
 }
 
+/* ---------- idle float / 3D tilt ---------- */
+/* Alternating pairs rather than 8 bespoke animations — different phase
+   and duration per pair keeps it from reading as mechanically synced.
+   Each keyframe stays a small, constant tilt (perspective on the grid
+   is what sells the "floating in space" read) plus a gentle vertical
+   drift, never enough to disturb the grid's alignment. */
+
+.feature-slot {
+  height: 100%;
+  /* preserve-3d so the inner layer's translateZ is actually projected by
+     the grid's perspective instead of being flattened here */
+  transform-style: preserve-3d;
+  animation: feature-float-a 5.4s ease-in-out infinite;
+}
+.feature-slot:nth-child(4n + 2) {
+  animation-name: feature-float-b;
+  animation-duration: 6s;
+}
+.feature-slot:nth-child(4n + 3) {
+  animation-name: feature-float-b;
+  animation-duration: 5s;
+  animation-delay: -1.6s;
+}
+.feature-slot:nth-child(4n + 4) {
+  animation-name: feature-float-a;
+  animation-duration: 6.4s;
+  animation-delay: -2.4s;
+}
+.feature-slot:hover {
+  animation-play-state: paused;
+}
+
+@keyframes feature-float-a {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(2deg) rotateY(-2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotateX(0deg) rotateY(1deg);
+  }
+}
+@keyframes feature-float-b {
+  0%,
+  100% {
+    transform: translateY(-4px) rotateX(-1deg) rotateY(2deg);
+  }
+  50% {
+    transform: translateY(6px) rotateX(1deg) rotateY(-1deg);
+  }
+}
+
+/* ---------- hover spread ---------- */
+/* Hovering a card lifts it toward the viewer and nudges its row
+   neighbours aside, so the grid reacts like a deck being fanned — while
+   every card stays in place and readable, unlike a true stacked fan.
+   Lives on its own layer: the slot's float animation owns `transform`
+   there, and framer-motion owns it on the card. */
+
+.feature-slot-inner {
+  height: 100%;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.45s var(--ease),
+    opacity 0.35s ease;
+}
+
+.feature-slot:hover .feature-slot-inner {
+  transform: translateZ(46px) scale(1.03);
+}
+
+/* Neighbours give way. The :not() guards stop a push from jumping a row
+   boundary — in a 4-up grid, card 4 and card 5 are adjacent in the DOM
+   but sit on different rows, so pushing between them would look wrong. */
+.feature-slot:hover + .feature-slot:not(:nth-child(4n + 1)) .feature-slot-inner {
+  transform: translateX(16px) scale(0.975);
+}
+.feature-slot:not(:nth-child(4n)):has(+ .feature-slot:hover)
+  .feature-slot-inner {
+  transform: translateX(-16px) scale(0.975);
+}
+
+/* Everything else recedes slightly, so the hovered card reads as the
+   focus. Opacity sits here rather than on the card, since framer-motion
+   leaves an inline opacity there that a stylesheet rule can't beat. */
+.features-grid:has(.feature-slot:hover)
+  .feature-slot:not(:hover)
+  .feature-slot-inner {
+  opacity: 0.62;
+}
+
+/* ---------- card ---------- */
+
 .feature-card {
+  height: 100%;
   padding: 26px 24px 28px;
   border-radius: var(--r-lg);
+  background: linear-gradient(
+    165deg,
+    rgba(26, 29, 52, 0.65) 0%,
+    rgba(13, 15, 24, 0.85) 55%,
+    rgba(7, 8, 13, 0.92) 100%
+  );
+  border: 1px solid rgba(110, 130, 255, 0.16);
+  box-shadow:
+    0 22px 50px -28px rgba(0, 0, 0, 0.9),
+    0 0 26px -20px rgba(93, 120, 255, 0.35);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* framer-motion owns this element's `transform` for the entrance
+   animation, so hover feedback sticks to properties it never touches. */
+.feature-card:hover {
+  border-color: rgba(150, 165, 255, 0.36);
+  box-shadow:
+    0 28px 60px -26px rgba(0, 0, 0, 0.92),
+    0 0 40px -16px rgba(120, 110, 255, 0.55);
+}
+
+.feature-icon-tile {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.015)
+  );
 }
 
 .feature-title {
@@ -32,18 +162,109 @@
   color: var(--text-2);
 }
 
+/* ---------- per-column accent ---------- */
+
+.feature-tile-0 {
+  color: #93c5fd;
+  box-shadow: 0 10px 22px -12px rgba(93, 160, 255, 0.6);
+}
+.feature-tile-1 {
+  color: #c4b5fd;
+  box-shadow: 0 10px 22px -12px rgba(139, 92, 246, 0.6);
+}
+.feature-tile-2 {
+  color: #f9a8d4;
+  box-shadow: 0 10px 22px -12px rgba(236, 72, 153, 0.55);
+}
+.feature-tile-3 {
+  color: #7dd3fc;
+  box-shadow: 0 10px 22px -12px rgba(34, 211, 238, 0.55);
+}
+
+/* ---------- responsive ---------- */
+
+/* Two columns — the row boundary moves, so the nth-child guards that
+   keep a push from crossing rows have to move with it. */
 @media (max-width: 1100px) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .feature-slot:hover
+    + .feature-slot:not(:nth-child(4n + 1))
+    .feature-slot-inner,
+  .feature-slot:not(:nth-child(4n)):has(+ .feature-slot:hover)
+    .feature-slot-inner {
+    transform: none;
+  }
+  .feature-slot:hover
+    + .feature-slot:not(:nth-child(2n + 1))
+    .feature-slot-inner {
+    transform: translateX(14px) scale(0.975);
+  }
+  .feature-slot:not(:nth-child(2n)):has(+ .feature-slot:hover)
+    .feature-slot-inner {
+    transform: translateX(-14px) scale(0.975);
+  }
 }
 
+/* Stays a 2x2x2x2 grid all the way down — matches the Stats section's
+   mobile treatment (2 cards per row) rather than collapsing to a single
+   stacked column. */
 @media (max-width: 600px) {
   .features-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
+    perspective: none;
   }
   .feature-card {
-    padding: 22px;
+    padding: 18px 14px;
+  }
+  .feature-icon-tile {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .feature-title {
+    margin-top: 14px;
+    font-size: 0.92rem;
+  }
+  .feature-text {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  /* Idle float/tilt reads as jitter this tight, with nothing else
+     competing for depth — same fix pattern used for How It Works. */
+  .feature-slot {
+    animation: none;
+  }
+  /* No room to spread sideways at 2-up, and no hover on touch anyway. */
+  .feature-slot:hover .feature-slot-inner,
+  .feature-slot:hover + .feature-slot .feature-slot-inner,
+  .feature-slot:has(+ .feature-slot:hover) .feature-slot-inner {
+    transform: none;
+  }
+  .features-grid:has(.feature-slot:hover)
+    .feature-slot:not(:hover)
+    .feature-slot-inner {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 400px) {
+  .features-grid {
+    gap: 10px;
+  }
+  .feature-card {
+    padding: 15px 12px;
+  }
+  .feature-icon-tile {
+    width: 34px;
+    height: 34px;
+  }
+  .feature-title {
+    font-size: 0.86rem;
+  }
+  .feature-text {
+    font-size: 0.73rem;
   }
 }

@@ -2,6 +2,54 @@
   overflow: hidden;
 }
 
+/* Fills the empty space behind the section head with the same artwork
+   used in the hero, faded to transparent so it blends into the cards
+   below instead of competing with them — a quiet echo, not a repeat. */
+.hiw-head-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(300px, 42vw, 460px);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 92%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 45%,
+    transparent 92%
+  );
+}
+.hiw-head-bg-img {
+  position: absolute;
+  inset: 0;
+  /* This box is short relative to the source image, so "top" alone
+     crops in on the mostly-empty margin above the artwork's icons —
+     biasing down a bit centers on the actual detail instead. */
+  background-position: center 30%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+}
+.hiw-head-bg-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    /* Ellipse now reaches close to the full width before going fully
+       dark — at 62% it was fading to solid --bg by the outer ~19% on
+       each side, which blanked out the artwork there entirely and read
+       as empty space flanking a narrow visible strip in the middle. */
+    radial-gradient(
+      ellipse 100% 62% at 50% 26%,
+      rgba(7, 8, 11, 0.32) 0%,
+      rgba(7, 8, 11, 0.6) 68%,
+      rgba(7, 8, 11, 0.82) 100%
+    ),
+    linear-gradient(180deg, rgba(7, 8, 11, 0.28) 0%, transparent 42%);
+}
+
 .hiw-glow {
   width: 520px;
   height: 520px;
@@ -11,45 +59,279 @@
   opacity: 0.55;
 }
 
-.hiw-grid-wrap {
+/* ---------- stage ---------- */
+
+.hiw-stage {
   position: relative;
+  /* extra top/bottom room for the ±30px stagger offset on the cards below */
+  padding: 56px 0 46px;
 }
 
-/* connecting line behind the cards */
-.hiw-line {
+.hiw-chip-float {
   position: absolute;
-  top: 62px;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-.hiw-line-fill {
-  display: block;
-  height: 100%;
-  width: 100%;
-  transform-origin: left center;
-  background: linear-gradient(90deg, #4d7cff, #a855f7);
-  box-shadow: 0 0 14px rgba(93, 110, 255, 0.7);
-}
-
-.hiw-grid {
+  top: -10px;
+  right: 9%;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  position: relative;
+  place-items: center;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    150deg,
+    rgba(93, 110, 255, 0.3),
+    rgba(168, 85, 247, 0.18)
+  );
+  color: #b6c4ff;
+  box-shadow: 0 12px 26px -14px rgba(93, 110, 255, 0.85);
+  z-index: 2;
+  animation: hiw-chip-float 4.6s ease-in-out infinite;
+}
+@keyframes hiw-chip-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(4deg);
+  }
 }
 
+/* connecting wave behind the cards */
+.hiw-wave {
+  position: absolute;
+  inset: 26px 0 auto 0;
+  width: 100%;
+  height: 220px;
+  z-index: 0;
+  pointer-events: none;
+}
+.hiw-wave-track {
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 2;
+}
+.hiw-wave-fill {
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(120, 110, 255, 0.65));
+}
+
+/* perpetual "current" running along the connector — its own path/property
+   loop, independent of the scroll-driven draw-in above */
+.hiw-wave-flow {
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 0.018 0.06;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px rgba(148, 138, 255, 0.85));
+  animation: hiw-flow 4.2s linear infinite;
+}
+@keyframes hiw-flow {
+  to {
+    /* one full pathLength unit = exactly one lap, so the dash pattern
+       always lines back up — a seamless, glitch-free loop */
+    stroke-dashoffset: -1;
+  }
+}
+
+.hiw-track {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  perspective: 1500px;
+}
+
+.hiw-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The middle step reads as the focal moment — raised, more upright.
+   Each slot has its own baked-in float: a gentle bob plus a slight,
+   constant 3D tilt (the perspective on .hiw-track is what sells it),
+   so the whole trio feels like it's genuinely hovering above the page.
+   This lives on the plain wrapper, not the animated card (see JSX note) —
+   and each keyframe embeds the baseline offset, since a CSS animation
+   fully replaces `transform` for as long as it runs, it can't "add" to a
+   separate static declaration on the same property. */
+.hiw-slot-describe {
+  animation: hiw-float-a 5.2s ease-in-out infinite;
+}
+.hiw-slot-publish {
+  animation: hiw-float-b 5.8s ease-in-out infinite;
+}
+.hiw-slot-generate {
+  animation: hiw-float-c 4.6s ease-in-out infinite;
+}
+.hiw-slot:hover {
+  animation-play-state: paused;
+}
+
+@keyframes hiw-float-a {
+  0%,
+  100% {
+    transform: translateY(30px) rotateY(7deg) rotateX(4deg);
+  }
+  50% {
+    transform: translateY(16px) rotateY(5deg) rotateX(2deg);
+  }
+}
+@keyframes hiw-float-b {
+  0%,
+  100% {
+    transform: translateY(30px) rotateY(-7deg) rotateX(4deg);
+  }
+  50% {
+    transform: translateY(44px) rotateY(-5deg) rotateX(2deg);
+  }
+}
+@keyframes hiw-float-c {
+  0%,
+  100% {
+    transform: translateY(-26px) rotateX(3deg);
+  }
+  50% {
+    transform: translateY(-38px) rotateX(0deg);
+  }
+}
+
+/* Deep navy-to-black card, a soft blue-violet edge glow on all three so
+   they read as one cohesive, premium set — the middle step just gets a
+   brighter version of the same glow rather than a different color. */
 .hiw-card {
+  height: 100%;
   padding: 26px;
   border-radius: var(--r-lg);
+  background: linear-gradient(
+    165deg,
+    rgba(28, 32, 58, 0.7) 0%,
+    rgba(13, 15, 26, 0.86) 55%,
+    rgba(7, 8, 13, 0.92) 100%
+  );
+  border-color: rgba(99, 126, 255, 0.2);
+  box-shadow:
+    0 26px 60px -30px rgba(0, 0, 0, 0.9),
+    0 0 34px -22px rgba(93, 120, 255, 0.45);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.hiw-card-generate {
+  border-color: rgba(150, 165, 255, 0.32);
+  box-shadow:
+    0 30px 70px -30px rgba(0, 0, 0, 0.9),
+    0 0 54px -20px rgba(120, 110, 255, 0.65);
+}
+
+/* framer-motion owns this element's `transform`, so hover feedback is
+   kept to properties it never touches (box-shadow / border-color) —
+   see the JSX note on why the entrance animation can't share transform. */
+.hiw-card:hover {
+  border-color: rgba(140, 160, 255, 0.4);
+  box-shadow:
+    0 34px 74px -28px rgba(0, 0, 0, 0.92),
+    0 0 46px -18px rgba(120, 110, 255, 0.6);
+}
+.hiw-card-generate:hover {
+  box-shadow:
+    0 38px 84px -28px rgba(0, 0, 0, 0.95),
+    0 0 62px -16px rgba(120, 110, 255, 0.8);
 }
 
 .hiw-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* hexagon step icons — dark glass center behind a glowing gradient
+   outline (built by layering an inner hex slightly inset over an outer
+   gradient hex, rather than filling the whole shape with color), plus a
+   blurred halo behind it all and a slow breathing pulse. */
+.hiw-icon-hex {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  padding: 2.2px;
+  display: grid;
+  place-items: center;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  animation: hiw-icon-pulse 3.4s ease-in-out infinite;
+}
+.hiw-icon-hex::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  clip-path: inherit;
+  background: inherit;
+  filter: blur(16px);
+  opacity: 0.55;
+  z-index: -1;
+  animation: hiw-icon-glow 3.4s ease-in-out infinite;
+}
+.hiw-icon-hex-inner {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  clip-path: inherit;
+  background: linear-gradient(
+    165deg,
+    rgba(9, 10, 16, 0.95),
+    rgba(15, 17, 27, 0.88)
+  );
+}
+@keyframes hiw-icon-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+@keyframes hiw-icon-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.hiw-icon-describe {
+  background: linear-gradient(145deg, #8b5cf6 0%, #c084fc 100%);
+}
+.hiw-icon-describe .hiw-icon-hex-inner {
+  color: #cba8ff;
+}
+.hiw-icon-describe .hiw-icon-hex-inner svg {
+  filter: drop-shadow(0 0 7px rgba(168, 85, 247, 0.85));
+}
+
+.hiw-icon-generate {
+  background: linear-gradient(145deg, #38bdf8 0%, #7f5bff 55%, #c084fc 100%);
+}
+.hiw-icon-generate .hiw-icon-hex-inner {
+  color: #a8d4ff;
+}
+.hiw-icon-generate .hiw-icon-hex-inner svg {
+  filter: drop-shadow(0 0 7px rgba(93, 170, 255, 0.9));
+}
+
+.hiw-icon-publish {
+  background: linear-gradient(145deg, #10b981 0%, #5eead4 100%);
+}
+.hiw-icon-publish .hiw-icon-hex-inner {
+  color: #7ff3d4;
+}
+.hiw-icon-publish .hiw-icon-hex-inner svg {
+  filter: drop-shadow(0 0 7px rgba(52, 211, 153, 0.9));
 }
 
 .hiw-no {
@@ -70,12 +352,113 @@
   color: var(--text-2);
 }
 
-@media (max-width: 900px) {
-  .hiw-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+/* ---------- per-step mini widgets ---------- */
+
+.hiw-mini {
+  margin-top: 16px;
+  padding: 11px 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(99, 126, 255, 0.16);
+  background: rgba(80, 110, 255, 0.05);
+}
+
+.hiw-mini-chat {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.hiw-mini-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #6f8bff;
+  box-shadow: 0 0 0 3px rgba(111, 139, 255, 0.18);
+  animation: hiw-pulse 1.8s ease-in-out infinite;
+}
+.hiw-mini-chat p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #c9d0e0;
+}
+@keyframes hiw-pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
-  .hiw-line {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.hiw-progress-track {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.hiw-progress-fill {
+  display: block;
+  height: 100%;
+  width: 55%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #4d7cff 0%, #b06dfb 55%, #ec4899 100%);
+  animation: hiw-progress 2.6s ease-in-out infinite;
+}
+@keyframes hiw-progress {
+  0% {
+    width: 22%;
+  }
+  50% {
+    width: 78%;
+  }
+  100% {
+    width: 22%;
+  }
+}
+.hiw-mini-label {
+  display: block;
+  margin-top: 9px;
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.hiw-mini-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 7px 12px 7px 10px;
+  border-radius: 99px;
+  color: #4ade80;
+  background: rgba(45, 200, 120, 0.13);
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  font-size: 0.78rem;
+}
+.hiw-mini-live .mono {
+  color: #bdf2d1;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .hiw-wave,
+  .hiw-chip-float {
     display: none;
+  }
+  .hiw-track {
+    flex-direction: column;
+    gap: 16px;
+    perspective: none;
+  }
+  /* `animation: none` (not just transform) — a running keyframe animation
+     always wins over a plain `transform` reset on the same property. */
+  .hiw-slot-describe,
+  .hiw-slot-publish,
+  .hiw-slot-generate {
+    animation: none;
+    transform: none;
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, HelpCircle } from "lucide-react";
 import Reveal from "../../ui/Reveal";
 import "./FAQ.css";
 
@@ -38,7 +38,10 @@ export default function FAQ() {
     <section className="section faq" id="faq">
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">FAQ</span>
+          <span className="badge-pill">
+            <HelpCircle size={14} strokeWidth={2.2} />
+            FAQ
+          </span>
           <h2 className="h-section mt-3">Questions, answered.</h2>
         </Reveal>
 

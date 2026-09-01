@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import logo from "../../assets/Images/logo.png";
 import "./Header.css";
 
 const LINKS = [
@@ -39,7 +40,7 @@ export default function Header() {
       <div className="shell nav-inner">
         <a href="#top" className="nav-logo" aria-label="AI Builder home">
           <span className="nav-logo-mark">
-            <Sparkles size={16} strokeWidth={2.2} />
+            <img src={logo} alt="" />
           </span>
           <span className="nav-logo-text">AI Builder</span>
         </a>

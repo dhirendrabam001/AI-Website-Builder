@@ -10,6 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import Reveal, { RevealGroup, revealChild } from "../../ui/Reveal";
+import GatewayFlow from "../../ui/GatewayFlow";
 import "./Features.css";
 
 const FEATURES = [
@@ -57,12 +58,16 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section className="section features" id="features">
+    <section className="section features position-relative" id="features">
+      <GatewayFlow density={1} speed={1} strokeWidth={1} />
       <div className="glow glow-blue features-glow" />
 
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">Features</span>
+          <span className="badge-pill">
+            <Blocks size={14} strokeWidth={2.2} />
+            Features
+          </span>
           <h2 className="h-section mt-3">
             Everything you'd expect,
             <br />
@@ -75,18 +80,30 @@ export default function Features() {
         </Reveal>
 
         <RevealGroup className="features-grid" stagger={0.06}>
-          {FEATURES.map((f) => (
-            <motion.article
-              key={f.title}
-              className="feature-card card-ai card-hoverable"
-              variants={revealChild}
-            >
-              <span className="icon-chip">
-                <f.icon size={18} strokeWidth={1.9} />
-              </span>
-              <h3 className="h-card feature-title">{f.title}</h3>
-              <p className="feature-text">{f.text}</p>
-            </motion.article>
+          {FEATURES.map((f, i) => (
+            // The idle float/tilt lives on this plain wrapper, not the
+            // motion element inside — framer-motion writes its own
+            // `transform` as the card reveals, which would silently wipe
+            // out a CSS animation living on the same property/element.
+            <div key={f.title} className="feature-slot">
+              {/* Three layers, one transform each — they'd overwrite each
+                  other on a single node: the slot runs the idle float
+                  (CSS animation), this inner div handles the hover
+                  spread/lift, and framer-motion owns the card's own
+                  transform for the reveal. */}
+              <div className="feature-slot-inner">
+                <motion.article
+                  className="feature-card card-ai"
+                  variants={revealChild}
+                >
+                  <span className={`feature-icon-tile feature-tile-${i % 4}`}>
+                    <f.icon size={19} strokeWidth={1.9} />
+                  </span>
+                  <h3 className="h-card feature-title">{f.title}</h3>
+                  <p className="feature-text">{f.text}</p>
+                </motion.article>
+              </div>
+            </div>
           ))}
         </RevealGroup>
       </div>

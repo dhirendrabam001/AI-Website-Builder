@@ -43,7 +43,10 @@ export default function WhyAIBuilder() {
     <section className="section why">
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">Why AI Builder</span>
+          <span className="badge-pill">
+            <ShieldCheck size={14} strokeWidth={2.2} />
+            Why AI Builder
+          </span>
           <h2 className="h-section mt-3">
             The shortest path between
             <br />

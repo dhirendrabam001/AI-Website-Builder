@@ -1,12 +1,30 @@
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import gsap from "gsap";
-import { Sparkles } from "lucide-react";
+import { Rocket, Globe, Files, Zap } from "lucide-react";
 import "./Stats.css";
 
 const STATS = [
-  { value: 10, suffix: "K+", label: "Websites Created" },
-  { value: 50, suffix: "K+", label: "Sections Generated" },
-  { value: 99, suffix: "%", label: "Responsive" },
+  {
+    key: "sites",
+    icon: Globe,
+    value: 10,
+    suffix: "K+",
+    label: "Websites Created",
+  },
+  {
+    key: "sections",
+    icon: Files,
+    value: 50,
+    suffix: "K+",
+    label: "Sections Generated",
+  },
+  {
+    key: "responsive",
+    icon: Zap,
+    value: 99,
+    suffix: "%",
+    label: "Responsive",
+  },
 ];
 
 export default function Stats() {
@@ -14,7 +32,9 @@ export default function Stats() {
 
   /* Count up once, when the row scrolls into view. */
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     const ctx = gsap.context(() => {
       gsap.utils.toArray(".stat-num").forEach((el) => {
@@ -43,23 +63,41 @@ export default function Stats() {
     <section className="section stats-section" ref={rootRef}>
       <div className="shell">
         <div className="stats-row card-ai">
+          <span className="stats-corner stats-corner-l" aria-hidden="true" />
+          <span className="stats-corner stats-corner-r" aria-hidden="true" />
+
+          {/* brand block — left aligned, sets up the numbers that follow */}
           <div className="stat stat-brand">
-            <span className="icon-chip sm">
-              <Sparkles size={14} strokeWidth={2.2} />
+            <span className="stat-icon-tile">
+              <Rocket size={20} strokeWidth={1.9} />
             </span>
-            <span className="stat-brand-text">Built with AI</span>
+            <div className="stat-value">
+              <span className="stat-num" data-value={5}>
+                0
+              </span>
+              <span> Min</span>
+            </div>
+            <div className="stat-label">Average Build Time</div>
           </div>
 
           {STATS.map((s) => (
-            <div className="stat" key={s.label}>
-              <div className="stat-value">
-                <span className="stat-num grad-text" data-value={s.value}>
-                  0
+            <Fragment key={s.key}>
+              {/* Separator is a real flex item, so `space-between` lands
+                  it dead-centre between its two neighbours on its own. */}
+              <span className="stat-sep" aria-hidden="true" />
+              <div className={`stat stat-${s.key}`}>
+                <span className="stat-icon-tile">
+                  <s.icon size={20} strokeWidth={1.9} />
                 </span>
-                <span className="grad-text">{s.suffix}</span>
+                <div className="stat-value">
+                  <span className="stat-num" data-value={s.value}>
+                    0
+                  </span>
+                  <span>{s.suffix}</span>
+                </div>
+                <div className="stat-label">{s.label}</div>
               </div>
-              <div className="stat-label">{s.label}</div>
-            </div>
+            </Fragment>
           ))}
         </div>
       </div>

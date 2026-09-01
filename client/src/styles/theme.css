@@ -131,7 +131,10 @@ img {
 }
 
 .h-section {
-  font-size: clamp(1.95rem, 3.5vw, 3rem);
+  /* Fixed 70px overflowed on narrow screens with no mobile fallback —
+     clamp keeps that exact size as the desktop ceiling but scales down
+     below it, same as every other responsive heading in the site. */
+  font-size: 56px;
   line-height: 1.1;
   letter-spacing: -0.028em;
   font-weight: 600;
@@ -183,7 +186,7 @@ img {
 
 .section {
   position: relative;
-  padding: var(--section-y) 0;
+  padding: 50px 0px;
 }
 
 /* The proof/stat row is a visual bridge, not a full content section. */
@@ -201,8 +204,22 @@ img {
   z-index: 2;
 }
 
+/* Below max-width, .shell's own width equals the viewport's, so with no
+   padding here content sits flush against the screen edge — every
+   section relies on .shell for its gutter, and this was the one place
+   it was missing. A few components patched it locally (Hero's
+   .hero-copy adds its own padding-inline), but most didn't, which is
+   why cards like the stats row were touching the edges on mobile.
+   Scoped to <=1300px only — above that .shell already has natural
+   margin from centering, so desktop layouts are untouched. */
+@media (max-width: 1300px) {
+  .shell {
+    padding-inline: clamp(18px, 4vw, 40px);
+  }
+}
+
 .section-head {
-  max-width: 680px;
+  max-width: 1000px;
   margin-inline: auto;
   text-align: center;
   margin-bottom: var(--section-head-gap);
@@ -222,17 +239,18 @@ img {
   gap: 9px;
   padding: 7px 15px 7px 11px;
   border-radius: 99px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(150, 160, 255, 0.28);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.055),
-    rgba(255, 255, 255, 0.014)
+    rgba(126, 138, 255, 0.22),
+    rgba(255, 255, 255, 0.03)
   );
   backdrop-filter: blur(12px);
   font-size: 0.81rem;
   font-weight: 500;
-  color: var(--text-2);
+  color: var(--text);
   letter-spacing: -0.005em;
+  box-shadow: 0 10px 34px -20px rgba(120, 110, 255, 0.9);
 }
 .badge-pill svg {
   color: #9db2ff;
@@ -258,19 +276,104 @@ img {
     border-color 0.24s ease;
 }
 
+/* Premium primary CTA — used everywhere via this one class: a slow drifting
+   gradient, a periodic light sweep, and a thin rotating gradient ring, all
+   contained inside the pill so nothing bleeds past its rounded edge. */
+@property --btn-ang {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .btn-primary-ai {
-  background: var(--accent-grad);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   color: #fff;
+  background: linear-gradient(115deg, #4d7cff 0%, #7f5bff 45%, #a855f7 100%);
+  background-size: 220% 220%;
   box-shadow:
     0 8px 26px -12px rgba(93, 110, 255, 0.85),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  animation: btn-flow 5s ease-in-out infinite;
 }
+
+.btn-primary-ai::before,
+.btn-primary-ai::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* periodic diagonal light sweep */
+.btn-primary-ai::before {
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 65%
+  );
+  transform: translateX(-140%);
+  animation: btn-shine 3.4s ease-in-out infinite;
+}
+
+/* thin rotating gradient ring, hugging the inside edge of the pill */
+.btn-primary-ai::after {
+  padding: 1.4px;
+  background: conic-gradient(
+    from var(--btn-ang, 0deg),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.95) 10%,
+    rgba(255, 255, 255, 0) 24%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: btn-ring 2.6s linear infinite;
+}
+
 .btn-primary-ai:hover {
   color: #fff;
   transform: translateY(-1.5px);
   box-shadow:
     0 14px 38px -12px rgba(110, 105, 255, 0.95),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.btn-primary-ai:hover::before {
+  animation-duration: 1.5s;
+}
+
+@keyframes btn-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes btn-shine {
+  0%,
+  18% {
+    transform: translateX(-140%);
+  }
+  70%,
+  100% {
+    transform: translateX(140%);
+  }
+}
+@keyframes btn-ring {
+  to {
+    --btn-ang: 360deg;
+  }
 }
 
 .btn-ghost-ai {
@@ -294,7 +397,7 @@ img {
 /* card */
 .card-ai {
   position: relative;
-  border-radius: var(--r-lg);
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: linear-gradient(
     168deg,

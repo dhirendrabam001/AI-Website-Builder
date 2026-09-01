@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Wand2, Pencil, Eye, Rocket, Sparkles, User } from "lucide-react";
 import Reveal from "../../ui/Reveal";
 import useTypewriter from "../../../hooks/useTypewriter";
+import heroBg from "../../../assets/Images/hero-bg.webp";
 import "./BuilderShowcase.css";
 
 const USER_PROMPT = "Add a pricing section with three plans and a FAQ below it.";
@@ -39,11 +40,21 @@ export default function BuilderShowcase() {
 
   return (
     <section className="section showcase" id="showcase">
+      <div className="showcase-head-bg" aria-hidden="true">
+        <div
+          className="showcase-head-bg-img"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        />
+        <div className="showcase-head-bg-veil" />
+      </div>
       <div className="glow glow-violet showcase-glow" />
 
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">The Builder</span>
+          <span className="badge-pill">
+            <Sparkles size={14} strokeWidth={2.2} />
+            The Builder
+          </span>
           <h2 className="h-section mt-3">
             Talk to it. Watch it <span className="grad-text">build</span>.
           </h2>

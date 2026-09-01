@@ -61,7 +61,10 @@ export default function Testimonials() {
 
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">Testimonials</span>
+          <span className="badge-pill">
+            <Star size={14} strokeWidth={2.2} />
+            Testimonials
+          </span>
           <h2 className="h-section mt-3">
             Built by people who had
             <br />

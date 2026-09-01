@@ -1,344 +1,192 @@
+/* ============================================================
+   Hero — cinematic centered stage over a looping hero-video.mp4
+   The footage already carries the AI/image/code tiles + wave art,
+   so this file only adds parallax motion + a light contrast veil.
+   ============================================================ */
+
 .hero {
   position: relative;
-  padding: 100px 0px;
+  overflow: hidden;
+  min-height: min(100svh, 820px);
+  display: flex;
+  align-items: center;
+  padding: calc(var(--nav-h) + clamp(34px, 4.5vw, 60px)) 0
+    clamp(48px, 6vw, 80px);
+  isolation: isolate;
+}
+
+/* ---------- background stack ---------- */
+
+.hero-bg-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   overflow: hidden;
 }
 
-.hero-glow-1 {
-  width: 620px;
-  height: 620px;
-  top: -220px;
-  left: -140px;
-}
-.hero-glow-2 {
-  width: 560px;
-  height: 560px;
-  top: -60px;
-  right: -180px;
+/* Outer layer carries GSAP's scroll transform; the inner layer carries the
+   CSS keyframe drift — kept apart so the two never overwrite each other's
+   `transform` (CSS animations always win that fight). */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: transform;
 }
 
-.hero-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* object-position stays centered so `cover` only crops the minimum needed
+   to fill the frame — no extra bias that clips content off the left/right
+   edges. Zoom is kept just above 1 for the same reason. */
+.hero-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.005);
+  will-change: transform;
+  animation: hero-drift 26s ease-in-out infinite alternate;
+}
+
+/* Slow ambient push/pull — kept tiny so `cover`'s natural crop never grows. */
+@keyframes hero-drift {
+  0% {
+    transform: scale(1.005) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.02) translate3d(-0.4%, 0.25%, 0);
+  }
+  100% {
+    transform: scale(1.012) translate3d(0.4%, 0.4%, 0);
+  }
+}
+
+/* Darkens the top strip permanently (the fixed header sits transparent over
+   the hero at scroll-top, so nav text needs guaranteed contrast against the
+   video regardless of what's playing there) and softens the edges so the
+   copy stays legible without burying the footage. */
+.hero-bg-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 66% 60% at 50% 40%,
+      rgba(7, 8, 11, 0.42) 0%,
+      rgba(7, 8, 11, 0.15) 55%,
+      transparent 78%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(7, 8, 11, 0.88) 0%,
+      rgba(7, 8, 11, 0.58) 9%,
+      rgba(7, 8, 11, 0.22) 20%,
+      transparent 34%,
+      transparent 68%,
+      var(--bg) 100%
+    );
 }
 
 /* ---------- copy ---------- */
 
-.hero-copy {
-  max-width: 1000px;
-  text-align: center;
+.hero-inner {
+  z-index: 2;
+  display: flex;
+  justify-content: center;
 }
 
+.hero-copy {
+  max-width: 1100px;
+  text-align: center;
+  /* .shell now provides the gutter (theme.css) — this used to duplicate
+     it locally, which just meant extra inset on top of the fix below. */
+}
+
+/* .badge-pill's base styling (theme.css) now matches this look directly,
+   so no Hero-specific override is needed here. */
+
+/* Sized so the headline always holds its two reference lines. */
 .hero-title {
-  margin-top: 26px;
+  margin-top: 22px;
+  /* Same gap as .h-section: fixed 80px had no mobile fallback. Clamp
+     keeps 80px as the desktop ceiling, scales down below it. */
+  font-size: clamp(2.1rem, 8vw, 80px);
+  line-height: 1.08;
+  text-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
 }
 
 .hero-sub {
-  max-width: 640px;
-  margin: 24px auto 0;
+  max-width: 1000px;
+  margin: 18px auto 0;
+  font-size: clamp(0.95rem, 1.05vw, 1.05rem);
+  line-height: 1.6;
+  color: #b3bccb;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
-  margin-top: 36px;
+  gap: 13px;
+  margin-top: 28px;
+}
+
+.hero-cta {
+  padding: 14px 28px;
 }
 
 .hero-note {
-  margin-top: 20px;
-  font-size: 0.83rem;
+  margin-top: 18px;
+  font-size: 0.8rem;
   color: var(--text-3);
 }
-
-/* ---------- dashboard ---------- */
-
-.hero-dash-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 1060px;
-  margin-top: clamp(52px, 6vw, 84px);
-}
-
-.hero-dash {
-  border-radius: var(--r-xl);
-  box-shadow:
-    0 40px 90px -40px rgba(0, 0, 0, 0.95),
-    0 0 90px -50px rgba(93, 110, 255, 0.6);
-}
-
-.dash-body {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  min-height: 400px;
-}
-
-/* prompt column */
-.dash-prompt {
-  padding: 20px;
-  border-right: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.016);
-}
-
-.prompt-box {
-  margin-top: 12px;
-  display: flex;
-  gap: 9px;
-  padding: 13px;
-  border-radius: var(--r-sm);
-  border: 1px solid rgba(93, 110, 255, 0.28);
-  background: rgba(93, 110, 255, 0.055);
-  min-height: 88px;
-}
-.prompt-icon {
-  color: #9db2ff;
-  flex: 0 0 auto;
-  margin-top: 2px;
-}
-.prompt-text {
-  margin: 0;
-  font-size: 0.775rem;
-  line-height: 1.6;
-  color: #dde3f2;
-}
-
-.prompt-btn {
-  width: 100%;
-  margin-top: 12px;
-}
-
-.prompt-gen-label {
-  margin-top: 22px;
-}
-
-.build-list {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.build-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.79rem;
-  color: var(--text-2);
-}
-.build-check {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(45, 200, 120, 0.16);
-  color: #4ade80;
-  flex: 0 0 auto;
-}
-.build-ico {
-  color: var(--text-3);
-  flex: 0 0 auto;
-}
-
-/* preview column */
-.dash-preview {
-  padding: 18px;
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.022),
-    rgba(255, 255, 255, 0.005)
-  );
-}
-
-.prev-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.prev-logo {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: var(--accent-grad);
-  flex: 0 0 auto;
-}
-.prev-navline {
-  width: 42px;
-  height: 6px;
-}
-.prev-navline.short {
-  width: 30px;
-}
-.prev-navcta {
-  width: 58px;
-  height: 20px;
-  border-radius: 6px;
-  margin-left: auto;
-}
-
-.prev-hero {
-  padding: 34px 0 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
-}
-.prev-h1 {
-  width: 78%;
-  height: 17px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.19);
-}
-.prev-h1.w60 {
-  width: 52%;
-}
-.prev-p {
-  width: 62%;
-  height: 7px;
-}
-.prev-p.w40 {
-  width: 44%;
-}
-.prev-btn {
-  width: 108px;
-  height: 30px;
-  border-radius: 99px;
-  margin-top: 12px;
-}
-
-.prev-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.prev-card {
-  padding: 12px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.028);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.prev-thumb {
-  height: 46px;
-  border-radius: 8px;
-  background: linear-gradient(
-    140deg,
-    rgba(93, 110, 255, 0.25),
-    rgba(168, 85, 247, 0.14)
-  );
-}
-.prev-line {
-  height: 6px;
-  width: 100%;
-}
-.prev-line.short {
-  width: 60%;
-}
-
-/* ---------- floating chips ---------- */
-
-.hero-float {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 15px;
-  border-radius: 15px;
-  background: var(--glass);
-  backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-md, 0 18px 45px -22px rgba(0, 0, 0, 0.9));
-  z-index: 3;
-}
-.float-title {
-  font-size: 0.78rem;
-  font-weight: 550;
-  letter-spacing: -0.008em;
-  white-space: nowrap;
-}
-.float-sub {
-  font-size: 0.68rem;
-  color: var(--text-3);
-  margin-top: 2px;
-}
-
-.float-1 {
-  top: 16%;
-  left: -46px;
-}
-.float-2 {
-  bottom: 20%;
-  right: -40px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
-}
-.float-3 {
-  bottom: -22px;
-  left: 12%;
-}
-
-.float-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-}
-.float-bars span {
-  width: 8px;
-  border-radius: 2px;
-  background: var(--accent-grad);
-}
-.float-bars span:nth-child(1) {
-  height: 9px;
-}
-.float-bars span:nth-child(2) {
-  height: 15px;
-}
-.float-bars span:nth-child(3) {
-  height: 21px;
-}
-
-.live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.16);
+.hero-dot {
+  margin: 0 6px;
+  opacity: 0.65;
 }
 
 /* ---------- responsive ---------- */
 
-@media (max-width: 1100px) {
-  .float-1 {
-    left: -14px;
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+    padding: calc(var(--nav-h) + 54px) 0 72px;
   }
-  .float-2 {
-    right: -10px;
+  .hero-copy {
+    max-width: 560px;
   }
 }
 
-@media (max-width: 860px) {
-  .dash-body {
-    grid-template-columns: 1fr;
+@media (max-width: 560px) {
+  .hero {
+    padding: calc(var(--nav-h) + 40px) 0 62px;
   }
-  .dash-prompt {
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
+  .hero-title {
+    margin-top: 20px;
+    line-height: 1.1;
+    font-size: 28px;
   }
-  .hero-float {
-    display: none;
+  .hero-sub {
+    font-size: 0.96rem;
+    line-height: 1.62;
+    margin-top: 18px;
   }
-  .prev-grid {
-    grid-template-columns: 1fr 1fr;
+  .hero-actions {
+    margin-top: 28px;
+    gap: 11px;
+    flex-direction: column;
+    align-items: stretch;
   }
-  .prev-card:last-child {
-    display: none;
+  .hero-actions .btn-ai {
+    width: 100%;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-video {
+    animation: none;
   }
 }

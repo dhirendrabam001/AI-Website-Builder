@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, Tag } from "lucide-react";
 import Reveal, { RevealGroup, revealChild } from "../../ui/Reveal";
 import "./Pricing.css";
 
@@ -62,7 +62,10 @@ export default function Pricing() {
 
       <div className="shell">
         <Reveal className="section-head">
-          <span className="eyebrow">Pricing</span>
+          <span className="badge-pill">
+            <Tag size={14} strokeWidth={2.2} />
+            Pricing
+          </span>
           <h2 className="h-section mt-3">
             Simple plans,
             <span className="grad-text"> no surprises</span>.

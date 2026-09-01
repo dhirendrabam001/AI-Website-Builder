@@ -2,6 +2,47 @@
   overflow: hidden;
 }
 
+/* Fills the space behind the section head with the same artwork used in
+   the hero, faded to transparent so it blends into the showcase frame
+   below instead of competing with it — same treatment as How It Works. */
+.showcase-head-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(300px, 42vw, 460px);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 92%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 45%,
+    transparent 92%
+  );
+}
+.showcase-head-bg-img {
+  position: absolute;
+  inset: 0;
+  background-position: center 30%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+}
+.showcase-head-bg-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 100% 62% at 50% 26%,
+      rgba(7, 8, 11, 0.32) 0%,
+      rgba(7, 8, 11, 0.6) 68%,
+      rgba(7, 8, 11, 0.82) 100%
+    ),
+    linear-gradient(180deg, rgba(7, 8, 11, 0.28) 0%, transparent 42%);
+}
+
 .showcase-glow {
   width: 620px;
   height: 620px;

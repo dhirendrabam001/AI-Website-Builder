@@ -28,16 +28,26 @@
   flex: 0 0 auto;
   margin-right: auto;
 }
+/* logo.png bundles mark + wordmark + tagline in one transparent PNG at
+   1536x1024; the hexagon mark itself sits at roughly x:570-992, y:162-614
+   (measured from the source alpha channel). This crops just that mark —
+   via a fixed-ratio, overflow-hidden box and an oversized/offset <img> —
+   so it renders crisp at any size without a separate exported asset. */
 .nav-logo-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: var(--accent-grad);
-  color: #fff;
-  box-shadow: 0 6px 18px -8px rgba(93, 110, 255, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  position: relative;
+  width: 34px;
+  aspect-ratio: 211 / 226;
+  overflow: hidden;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 6px 16px rgba(93, 110, 255, 0.45));
+}
+.nav-logo-mark img {
+  position: absolute;
+  top: -35.85%;
+  left: -135.1%;
+  width: 364.03%;
+  max-width: none;
+  height: auto;
 }
 .nav-logo-text {
   font-size: 1rem;
@@ -123,5 +133,14 @@
   }
   .nav-burger {
     display: inline-flex;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-logo-mark {
+    width: 29px;
+  }
+  .nav-logo-text {
+    font-size: 0.92rem;
   }
 }

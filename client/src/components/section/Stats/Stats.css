@@ -3,74 +3,243 @@
   padding-block: clamp(28px, 3.5vw, 48px);
 }
 
+/* Deep glass panel with a violet neon edge glow. Flex + space-between
+   rather than equal columns: equal columns are far wider than the
+   content they hold, which left dead margin against the card edges. */
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  overflow: hidden;
+  display: flex;
   align-items: center;
-  padding: clamp(24px, 3.4vw, 38px) clamp(20px, 3vw, 40px);
+  justify-content: space-between;
+  padding: clamp(26px, 3.4vw, 38px) clamp(26px, 3.6vw, 52px);
   border-radius: var(--r-lg);
+  background: linear-gradient(
+    165deg,
+    rgba(28, 19, 46, 0.72) 0%,
+    rgba(13, 11, 21, 0.9) 55%,
+    rgba(8, 7, 13, 0.94) 100%
+  );
+  border: 1px solid rgba(168, 100, 255, 0.34);
+  box-shadow:
+    0 30px 70px -34px rgba(0, 0, 0, 0.92),
+    0 0 60px -26px rgba(168, 85, 247, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.stat {
-  text-align: center;
-  position: relative;
-}
-.stat + .stat::before {
-  content: "";
+/* dotted circuit texture tucked into the left/right corners */
+.stats-corner {
   position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 42px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(255, 255, 255, 0.13),
-    transparent
+  bottom: -30px;
+  width: 190px;
+  height: 150px;
+  pointer-events: none;
+  background-image: radial-gradient(
+    rgba(180, 120, 255, 0.55) 1px,
+    transparent 1px
+  );
+  background-size: 9px 9px;
+}
+.stats-corner-l {
+  left: -14px;
+  mask-image: radial-gradient(
+    ellipse 100% 100% at 12% 96%,
+    #000 8%,
+    transparent 68%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 100% 100% at 12% 96%,
+    #000 8%,
+    transparent 68%
+  );
+}
+.stats-corner-r {
+  right: -14px;
+  mask-image: radial-gradient(
+    ellipse 100% 100% at 88% 96%,
+    #000 8%,
+    transparent 68%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 100% 100% at 88% 96%,
+    #000 8%,
+    transparent 68%
   );
 }
 
-.stat-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.stat-brand-text {
-  font-size: 0.95rem;
-  font-weight: 550;
-  letter-spacing: -0.015em;
+.stat {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  text-align: center;
 }
 
+/* thin vertical rule with a bright point at its centre */
+.stat-sep {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 1px;
+  height: 58px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(190, 140, 255, 0.34) 45%,
+    rgba(190, 140, 255, 0.34) 55%,
+    transparent
+  );
+}
+.stat-sep::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c084fc, #ec4899);
+  box-shadow: 0 0 9px 2px rgba(190, 120, 255, 0.7);
+}
+
+.stat-icon-tile {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 14px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(190, 140, 255, 0.2);
+  background: linear-gradient(
+    160deg,
+    rgba(150, 110, 255, 0.16),
+    rgba(255, 255, 255, 0.015)
+  );
+}
+
+/* ---------- brand block ---------- */
+
+.stat-brand {
+  text-align: left;
+}
+.stat-brand .stat-icon-tile {
+  margin-inline: 0;
+  color: #d3b4ff;
+  box-shadow: 0 12px 26px -12px rgba(168, 85, 247, 0.7);
+}
+.stat-brand .stat-value {
+  background: linear-gradient(100deg, #c084fc, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stat-brand-sub {
+  margin-top: 5px;
+  font-size: 0.74rem;
+  color: var(--text-3);
+}
+
+/* ---------- numbers ---------- */
+
 .stat-value {
-  font-size: clamp(1.7rem, 3vw, 2.35rem);
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  font-size: clamp(1.6rem, 2.7vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
   margin-top: 8px;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
   color: var(--text-2);
 }
 
-@media (max-width: 767px) {
+/* ---------- per-stat accent: icon glow + number gradient ---------- */
+
+.stat-sites .stat-icon-tile {
+  color: #c9b0ff;
+  box-shadow: 0 12px 26px -12px rgba(168, 85, 247, 0.6);
+}
+.stat-sites .stat-value {
+  background: linear-gradient(100deg, #f472b6, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stat-sections .stat-icon-tile {
+  color: #7dd3fc;
+  box-shadow: 0 12px 26px -12px rgba(56, 189, 248, 0.6);
+}
+.stat-sections .stat-value {
+  background: linear-gradient(100deg, #38bdf8, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stat-responsive .stat-icon-tile {
+  color: #c4b5fd;
+  box-shadow: 0 12px 26px -12px rgba(139, 92, 246, 0.65);
+}
+.stat-responsive .stat-value {
+  background: linear-gradient(100deg, #c084fc, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- responsive ---------- */
+/* Desktop's flex row becomes a real 2x2 grid — all four stats, brand
+   block included, at equal weight — and each stat becomes its own
+   bordered glass tile instead of four items separated by hairlines.
+   The vertical rules only make sense strung along one row, so they're
+   dropped once it wraps. */
+
+@media (max-width: 860px) {
   .stats-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: clamp(16px, 3.5vw, 22px);
   }
-  .stat + .stat::before {
+  .stat-sep {
     display: none;
   }
-  .stat-brand {
-    grid-column: span 2;
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--border);
+  .stat {
+    padding: 20px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid rgba(190, 140, 255, 0.18);
+    background: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.012)
+    );
+    box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.7);
   }
-  .stat:last-child {
-    grid-column: span 2;
+  .stat-brand {
+    text-align: center;
+  }
+  .stat-brand .stat-icon-tile {
+    margin-inline: auto;
+  }
+  .stats-corner {
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 420px) {
+  .stat-icon-tile {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-size: 1.35rem;
+  }
+  .stat-label,
+  .stat-brand-sub {
+    font-size: 0.72rem;
   }
 }

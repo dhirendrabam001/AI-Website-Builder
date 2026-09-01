@@ -1,0 +1,39 @@
+/* Background field — sits behind section content, never intercepts input. */
+.gateway-flow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gateway-flow-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Deliberately light in the middle: the converging focal point is the
+   whole effect, so darkening it (as a centred scrim would) erases the
+   thing worth looking at. Instead this only scrims the top band, where
+   the heading sits, and feathers the top/bottom edges so the field
+   never ends on a hard line against the neighbouring sections. */
+.gateway-flow-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 46% 30% at 50% 20%,
+      rgba(7, 8, 11, 0.72) 0%,
+      rgba(7, 8, 11, 0.3) 60%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      rgba(7, 8, 11, 0.35) 12%,
+      transparent 30%,
+      transparent 78%,
+      var(--bg) 100%
+    );
+}
