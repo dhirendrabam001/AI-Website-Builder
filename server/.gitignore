@@ -4,8 +4,8 @@ node_modules/
 # Environment variables (contains secrets/passwords)
 .env
 .env.local
-.env.*.local
-
+.env.development
+.env.production
 # Logs
 logs/
 *.log
