@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import logo from "../../assets/Images/logo.png";
@@ -54,9 +55,10 @@ export default function Header() {
         </nav>
 
         <div className="nav-actions">
-          <a href="#login" className="nav-link nav-login">
+          <Link to="/login" className="nav-link nav-login">
             Login
-          </a>
+          </Link>
+
           <a href="#cta" className="btn-ai btn-primary-ai btn-sm-ai">
             Start Building Free
           </a>

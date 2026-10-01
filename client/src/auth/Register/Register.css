@@ -1,0 +1,272 @@
+/* ============================================================
+   Register Page — Built strictly on root design tokens
+   ============================================================ */
+
+.register-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 80px) 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Ambient glow positioning */
+.register-glow-1 {
+  width: 500px;
+  height: 500px;
+  top: -120px;
+  right: -100px;
+}
+
+.register-glow-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -120px;
+}
+
+.register-shell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 480px;
+  padding: clamp(28px, 4vw, 42px);
+  background: var(--glass);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.75);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.register-title {
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.btn-social {
+  width: 100%;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.register-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 22px 0;
+}
+
+.register-divider::before,
+.register-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.register-divider .eyebrow {
+  padding: 0 12px;
+}
+
+/* Form Styling */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-relative {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-ai {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.input-ai::placeholder {
+  color: var(--text-3);
+}
+
+.input-ai:focus {
+  border-color: rgba(127, 91, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(127, 91, 255, 0.15);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: var(--text-2);
+}
+
+/* Password Strength Bar */
+.strength-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.strength-bar-bg {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-elev);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* Checkbox Styling */
+.terms-checkbox {
+  margin-top: 2px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-soft);
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background: var(--accent-grad);
+  border-color: transparent;
+}
+
+.checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark::after {
+  display: block;
+}
+
+.terms-text {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.link-hover {
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.link-hover:hover {
+  color: var(--text);
+}
+
+.btn-submit {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: var(--r-sm);
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 24px;
+  margin-bottom: 0;
+  font-size: 0.88rem;
+}
+
+.link-bold {
+  font-weight: 600;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .register-card {
+    border-radius: var(--r-md);
+    padding: 24px 18px;
+  }
+
+  .register-glow-1,
+  .register-glow-2 {
+    width: 280px;
+    height: 280px;
+  }
+}
