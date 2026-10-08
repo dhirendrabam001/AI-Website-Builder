@@ -55,13 +55,10 @@ export default function Header() {
         </nav>
 
         <div className="nav-actions">
-          <Link to="/login" className="nav-link nav-login">
-            Login
-          </Link>
 
-          <a href="#cta" className="btn-ai btn-primary-ai btn-sm-ai">
-            Start Building Free
-          </a>
+          <Link to="/login" className="btn-ai btn-primary-ai btn-sm-ai">
+            Get Started
+          </Link>
         </div>
 
         <button
