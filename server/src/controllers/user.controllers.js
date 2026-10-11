@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { User } = require("../models/user.models");
 const register = async (req, res) => {
   try {
@@ -77,12 +78,13 @@ const login = async (req, res) => {
 
     // normalize email
     const normalizeEmail = email.trim().toLowerCase();
+    console.log(normalizeEmail);
 
     // find user and password
     const user = await User.findOne({
       email: normalizeEmail,
     }).select("+password");
-    console.log(user);
+    console.log("user", user);
 
     if (!user) {
       return res
@@ -105,6 +107,24 @@ const login = async (req, res) => {
         .json({ success: false, message: "Password is not matched" });
     }
 
+    // jwt verification
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.SECRET_KEY,
+      { expiresIn: "1d" },
+    );
+
+    // store token
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
+    });
     // 6. Update last login time
     user.lastLoginAt = new Date();
     await user.save();
@@ -116,7 +136,7 @@ const login = async (req, res) => {
       data: {
         user: {
           id: user._id,
-          firstName: user.firstName,
+          fullName: user.fullName,
           email: user.email,
           avatar: user.avatar,
           role: user.role,
@@ -130,6 +150,26 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error("error", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+const logout = (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_NENV === "production",
+      sameSite: true,
+      path: "/",
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout issue", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
