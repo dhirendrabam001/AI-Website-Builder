@@ -78,13 +78,11 @@ const login = async (req, res) => {
 
     // normalize email
     const normalizeEmail = email.trim().toLowerCase();
-    console.log(normalizeEmail);
 
     // find user and password
     const user = await User.findOne({
       email: normalizeEmail,
     }).select("+password");
-    console.log("user", user);
 
     if (!user) {
       return res
@@ -113,7 +111,7 @@ const login = async (req, res) => {
         id: user._id,
         role: user.role,
       },
-      process.env.SECRET_KEY,
+      process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
 
@@ -134,6 +132,7 @@ const login = async (req, res) => {
       success: true,
       message: "Login successful.",
       data: {
+        token,
         user: {
           id: user._id,
           fullName: user.fullName,
@@ -156,12 +155,59 @@ const login = async (req, res) => {
   }
 };
 
+// me controller
+const me = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // find user or not
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User is not found" });
+    }
+
+    // user active or not check
+    if (!user.isActive) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Account is not active" });
+    }
+
+    // store data
+    return res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      data: {
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          avatar: user.avatar,
+          role: user.role,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
+          plan: user.plan,
+          aiCredits: user.aiCredits,
+          lastLoginAt: user.lastLoginAt,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 const logout = (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_NENV === "production",
-      sameSite: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
     });
 
@@ -176,4 +222,4 @@ const logout = (req, res) => {
   }
 };
 
-module.exports = { register, login };
+module.exports = { register, login, me, logout };
