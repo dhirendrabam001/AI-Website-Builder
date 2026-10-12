@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models/user.models");
 const register = async (req, res) => {
   try {
-    const { fullName, email, password, confirmPassword } = req.body;
+    const { fullName, email, password, confirmPassword, agreeToTerms } =
+      req.body;
 
     // validation required or not
     if (!fullName || !email || !password || !confirmPassword) {
@@ -11,6 +12,16 @@ const register = async (req, res) => {
         success: false,
         message: "Please every field are required neccessary",
       });
+    }
+
+    // validation terms condition
+    if (agreeToTerms !== true) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "You must accept the termns of condition",
+        });
     }
     // check password and confirm password
     if (password !== confirmPassword) {

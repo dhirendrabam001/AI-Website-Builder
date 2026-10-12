@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
 import "./styles/theme.css";
 import "./App.css";
 import useLenis from "./hooks/useLenis";
@@ -8,6 +9,7 @@ import Home from "./pages/Home/Home";
 import { Route, Routes } from "react-router-dom";
 import Login from "./auth/Login/Login";
 import Register from "./auth/Register/Register";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   useLenis();
@@ -23,6 +25,16 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        theme="colored"
+      />
     </div>
   );
 }

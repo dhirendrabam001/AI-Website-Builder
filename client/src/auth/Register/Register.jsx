@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import "./Register.css";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { showPromise } from "../../utils/toast";
+import { USER_API_END_POINT } from "../../apis/apis";
 
 export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -10,41 +15,24 @@ export default function Register() {
     agreeToTerms: false,
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Simple password strength check
-  const getPasswordStrength = () => {
-    const { password } = formData;
-    if (!password) return { label: "", strength: 0 };
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 1) return { label: "Weak", strength: 25, color: "#ff5f57" };
-    if (score === 2 || score === 3)
-      return { label: "Medium", strength: 65, color: "#febc2e" };
-    return { label: "Strong", strength: 100, color: "#28c840" };
-  };
-
-  const strengthInfo = getPasswordStrength();
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-    // Handle registration logic here
+
+    showPromise(
+      axios.post(`${USER_API_END_POINT}/register`, formData, {
+        withCredentials: true,
+      }),
+      {
+        pending: "Creating account...",
+        success: "Account Created Successfully!",
+        error: "Failed to create account 😢",
+      },
+    );
   };
 
   return (
@@ -113,10 +101,8 @@ export default function Register() {
                 Full Name
               </label>
               <input
-                id="fullName"
                 type="text"
                 name="fullName"
-                required
                 placeholder="Alex Morgan"
                 value={formData.fullName}
                 onChange={handleChange}
@@ -129,10 +115,8 @@ export default function Register() {
                 Email Address
               </label>
               <input
-                id="email"
                 type="email"
                 name="email"
-                required
                 placeholder="alex@company.com"
                 value={formData.email}
                 onChange={handleChange}
@@ -146,10 +130,8 @@ export default function Register() {
               </label>
               <div className="input-relative">
                 <input
-                  id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  required
                   placeholder="At least 8 characters"
                   value={formData.password}
                   onChange={handleChange}
@@ -164,27 +146,6 @@ export default function Register() {
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="strength-meter">
-                  <div className="strength-bar-bg">
-                    <div
-                      className="strength-bar-fill"
-                      style={{
-                        width: `${strengthInfo.strength}%`,
-                        backgroundColor: strengthInfo.color,
-                      }}
-                    />
-                  </div>
-                  <span
-                    className="strength-text"
-                    style={{ color: strengthInfo.color }}
-                  >
-                    {strengthInfo.label}
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className="form-group">
@@ -192,10 +153,8 @@ export default function Register() {
                 Confirm Password
               </label>
               <input
-                id="confirmPassword"
                 type="password"
                 name="confirmPassword"
-                required
                 placeholder="Re-enter password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -228,7 +187,7 @@ export default function Register() {
             </div>
 
             <button type="submit" className="btn-ai btn-primary-ai btn-submit">
-              Get Started Free
+              Register
               <svg
                 width="16"
                 height="16"
@@ -246,9 +205,9 @@ export default function Register() {
           {/* Footer inside card */}
           <p className="register-footer muted">
             Already have an account?{" "}
-            <a href="#login" className="grad-text link-bold">
+            <Link to="/login" className="grad-text link-bold">
               Sign in
-            </a>
+            </Link>
           </p>
         </div>
       </div>

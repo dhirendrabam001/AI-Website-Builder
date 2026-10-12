@@ -1,18 +1,49 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Login.css";
+import axios from "axios";
+import { USER_API_END_POINT } from "../../apis/apis";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/authSlice";
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle authentication logic here
+    try {
+      const promise = axios.post(`${USER_API_END_POINT}/login`, formData, {
+        withCredentials: true,
+      });
+      toast.promise(promise, {
+        pending: "Loging...",
+        success: "Login Successful",
+        error: {
+          render({ data }) {
+            return data?.response?.data?.message || "Something is error";
+          },
+        },
+      });
+
+      const res = await promise;
+      if (res.data.success) {
+        dispatch(setUser(res.data.auth));
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -81,10 +112,8 @@ export default function Login() {
                 Email Address
               </label>
               <input
-                id="email"
                 type="email"
                 name="email"
-                required
                 placeholder="name@company.com"
                 value={formData.email}
                 onChange={handleChange}
@@ -103,10 +132,8 @@ export default function Login() {
               </div>
               <div className="input-relative">
                 <input
-                  id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  required
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
