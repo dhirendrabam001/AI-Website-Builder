@@ -86,6 +86,112 @@
   flex: 0 0 auto;
 }
 
+/* account dropdown */
+.account {
+  position: relative;
+}
+.account-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.22s ease, background 0.22s ease;
+}
+.account-btn:hover {
+  border-color: rgba(127, 91, 255, 0.55);
+}
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-grad);
+  color: #fff;
+  font-weight: 700;
+}
+.account-chevron {
+  color: var(--text-2);
+  transition: transform 0.2s ease;
+}
+.account-chevron.is-open {
+  transform: rotate(180deg);
+}
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 340px;
+  padding: 6px;
+  border-radius: var(--r-md);
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(127, 91, 255, 0.08);
+}
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.account-item + .account-item {
+  border-top: 1px solid var(--border);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.account-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.account-item strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.account-item small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+.account-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  background: rgba(127, 91, 255, 0.14);
+  border: 1px solid rgba(127, 91, 255, 0.28);
+  color: #b9a4ff;
+}
+.account-item-danger .account-icon {
+  background: rgba(255, 90, 95, 0.12);
+  border-color: rgba(255, 90, 95, 0.28);
+  color: #ff7b80;
+}
+.account-item-danger:hover {
+  background: rgba(255, 90, 95, 0.08);
+}
+
 .nav-burger {
   display: none;
   width: 38px;

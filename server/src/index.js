@@ -8,7 +8,7 @@ const connectDB = require("./config/connection");
 const app = express();
 
 // CORS configuration
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5174")
   .split(",")
   .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter(Boolean);

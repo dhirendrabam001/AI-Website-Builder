@@ -1,0 +1,83 @@
+/* The hero is a tall, vertically-centered stage, so it leaves empty space
+   under its buttons. Pull the prompt box up into that space (the hero video
+   already fades to --bg at its bottom edge) so the two read as one block. */
+.prompt-section {
+  z-index: 3;
+  margin-top: calc(-1 * clamp(70px, 9vw, 130px));
+  padding-top: 0;
+  padding-bottom: clamp(16px, 2.5vw, 32px);
+}
+
+@media (max-width: 900px) {
+  /* hero is auto-height here with its own bottom padding — just tighten it */
+  .hero:has(+ .prompt-section) {
+    padding-bottom: 28px;
+  }
+  .prompt-section {
+    margin-top: 0;
+  }
+}
+
+.prompt-box {
+  position: relative;
+  max-width: 840px;
+  margin-inline: auto;
+  padding: 20px 20px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(127, 91, 255, 0.45);
+  background:
+    radial-gradient(
+      120% 140% at 70% 0%,
+      rgba(127, 91, 255, 0.22),
+      transparent 60%
+    ),
+    var(--glass);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    0 30px 70px -40px rgba(93, 110, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.prompt-box:focus-within {
+  border-color: rgba(168, 85, 247, 0.75);
+  box-shadow:
+    0 30px 80px -36px rgba(127, 91, 255, 0.8),
+    0 0 0 3px rgba(127, 91, 255, 0.14);
+}
+
+.prompt-input {
+  display: block;
+  width: 100%;
+  min-height: 110px;
+  resize: none;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.prompt-input::placeholder {
+  color: var(--text-3);
+}
+
+.prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+@media (max-width: 575px) {
+  .prompt-box {
+    padding: 16px 16px 14px;
+  }
+  .prompt-actions .btn-ai {
+    width: 100%;
+  }
+}

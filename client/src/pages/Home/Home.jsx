@@ -1,4 +1,5 @@
 import Hero from "../../components/section/Hero/Hero";
+import TextArea from "../../components/section/TextArea/TextArea";
 import Stats from "../../components/section/Stats/Stats";
 import HowItWorks from "../../components/section/HowItWorks/HowItWorks";
 import BuilderShowcase from "../../components/section/BuilderShowcase/BuilderShowcase";
@@ -14,6 +15,7 @@ const Home = () => {
   return (
     <div className="homepage">
       <Hero />
+      <TextArea />
       <Stats />
       <HowItWorks />
       <BuilderShowcase />

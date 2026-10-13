@@ -10,9 +10,23 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./auth/Login/Login";
 import Register from "./auth/Register/Register";
 import { ToastContainer } from "react-toastify";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { USER_API_END_POINT } from "./apis/apis";
+import { setUser } from "./redux/authSlice";
 
 function App() {
   useLenis();
+  const dispatch = useDispatch();
+
+  // restore the logged-in user from the cookie after a page refresh
+  useEffect(() => {
+    axios
+      .get(`${USER_API_END_POINT}/me`, { withCredentials: true })
+      .then((res) => dispatch(setUser(res.data.data.user)))
+      .catch(() => dispatch(setUser(null)));
+  }, [dispatch]);
 
   return (
     <div className="app-shell">
