@@ -16,12 +16,10 @@ const register = async (req, res) => {
 
     // validation terms condition
     if (agreeToTerms !== true) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "You must accept the termns of condition",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "You must accept the termns of condition",
+      });
     }
     // check password and confirm password
     if (password !== confirmPassword) {

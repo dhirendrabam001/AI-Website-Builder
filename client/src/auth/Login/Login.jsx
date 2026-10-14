@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
 import { USER_API_END_POINT } from "../../apis/apis";
@@ -10,6 +10,7 @@ import { setUser } from "../../redux/authSlice";
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,7 +42,13 @@ export default function Login() {
       const res = await promise;
       if (res.data.success) {
         dispatch(setUser(res.data.data.user));
-        navigate("/");
+        // come back to where the visitor was heading (e.g. /product with their prompt)
+        navigate(location.state?.from || "/", {
+          replace: true,
+          state: location.state?.prompt
+            ? { prompt: location.state.prompt }
+            : undefined,
+        });
       }
     } catch (error) {
       console.error(error);

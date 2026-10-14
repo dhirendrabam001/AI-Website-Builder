@@ -41,15 +41,17 @@ app.get("/", (req, res) => {
 });
 
 // middleware
-app.use(express.json());
+app.use(express.json({ limit: "2mb" })); // saved project files can be a few hundred KB
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // routes
 const userRoutes = require("../src/routes/user.routes");
+const projectRoutes = require("../src/routes/project.routes");
 
 // apis
 app.use("/api/user", userRoutes);
+app.use("/api/projects", projectRoutes);
 const port = process.env.PORT || 2000;
 
 app.listen(port, async () => {
