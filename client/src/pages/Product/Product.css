@@ -756,3 +756,80 @@
   background: rgba(26, 15, 18, 0.96);
   border-top: 1px solid rgba(255, 95, 87, 0.4);
 }
+
+/* ---------- live multi-agent timeline ---------- */
+.pd-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.025);
+}
+.pd-agent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+.pd-agent.is-running,
+.pd-agent.is-done {
+  opacity: 1;
+}
+.pd-agent-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--text-3);
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.03);
+}
+.pd-agent.is-running .pd-agent-icon {
+  border-color: rgba(127, 91, 255, 0.5);
+  background: rgba(127, 91, 255, 0.14);
+}
+.pd-agent.is-done .pd-agent-icon {
+  color: #fff;
+  border-color: transparent;
+  background: var(--accent-grad);
+}
+.pd-agent-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+}
+.pd-agent-body strong {
+  font-size: 0.86rem;
+  color: var(--text);
+}
+.pd-agent-body > span {
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.pd-agent-body ul {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pd-agent-body li {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

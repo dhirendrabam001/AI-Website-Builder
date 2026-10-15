@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { User } = require("../models/user.models");
 const { Project } = require("../models/project.models");
-const { runAgent } = require("../services/ai.service");
+const { runAgents } = require("../services/ai.service");
 const { validateFiles } = require("../services/sanitize");
 const { maxMessageLength } = require("../config/ai");
 
@@ -20,6 +20,32 @@ const takeCredit = (userId) =>
   );
 const refundCredit = (userId) =>
   User.updateOne({ _id: userId }, { $inc: { aiCredits: 1 } });
+
+
+// Live progress: when the client asks for text/event-stream we stream the
+// agents' steps, then the final result. Otherwise it is one plain JSON reply.
+const wantsStream = (req) => (req.headers.accept || "").includes("text/event-stream");
+
+const openStream = (req, res) => {
+  if (!wantsStream(req)) {
+    return { emit: () => {}, done: (status, body) => res.status(status).json(body) };
+  }
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+  const send = (event, data) =>
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  return {
+    emit: (data) => send("agent", data),
+    done: (status, body) => {
+      send(status < 400 ? "result" : "failure", { status, ...body });
+      res.end();
+    },
+  };
+};
 
 const validId = (id) => mongoose.isValidObjectId(id);
 
@@ -85,8 +111,14 @@ const generate = async (req, res) => {
   const user = await takeCredit(userId);
   if (!user) return fail(res, 402, "You have no AI credits left");
 
+  const stream = openStream(req, res);
   try {
-    const { reply, files } = await runAgent({ files: [], history: [], message: prompt });
+    const { reply, files } = await runAgents({
+      files: [],
+      history: [],
+      message: prompt,
+      emit: stream.emit,
+    });
     const project = new Project({
       owner: userId,
       title: titleFrom(prompt),
@@ -99,7 +131,7 @@ const generate = async (req, res) => {
     });
     commit(project, "Initial version");
     await project.save();
-    return res.status(201).json({
+    return stream.done(201, {
       success: true,
       message: "Website generated",
       data: { project: detail(project), aiCredits: user.aiCredits },
@@ -107,7 +139,10 @@ const generate = async (req, res) => {
   } catch (error) {
     await refundCredit(userId);
     console.error("Generate error", error);
-    return fail(res, 502, "The AI could not build your site. Please try again.");
+    return stream.done(502, {
+      success: false,
+      message: "The AI could not build your site. Please try again.",
+    });
   }
 };
 
@@ -127,11 +162,13 @@ const chat = async (req, res) => {
   const user = await takeCredit(userId);
   if (!user) return fail(res, 402, "You have no AI credits left");
 
+  const stream = openStream(req, res);
   try {
-    const { reply, files } = await runAgent({
+    const { reply, files } = await runAgents({
       files: plainFiles(project.files),
       history: project.messages.map((m) => ({ role: m.role, content: m.content })),
       message,
+      emit: stream.emit,
     });
     project.files = files;
     project.messages.push(
@@ -140,7 +177,7 @@ const chat = async (req, res) => {
     );
     commit(project, message.slice(0, 60));
     await project.save();
-    return res.status(200).json({
+    return stream.done(200, {
       success: true,
       message: "Project updated",
       data: { project: detail(project), aiCredits: user.aiCredits },
@@ -148,7 +185,10 @@ const chat = async (req, res) => {
   } catch (error) {
     await refundCredit(userId);
     console.error("Chat error", error);
-    return fail(res, 502, "The AI could not apply that change. Please try again.");
+    return stream.done(502, {
+      success: false,
+      message: "The AI could not apply that change. Please try again.",
+    });
   }
 };
 

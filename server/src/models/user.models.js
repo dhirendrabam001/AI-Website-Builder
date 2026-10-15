@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema(
 
     aiCredits: {
       type: Number,
-      default: 10,
+      default: () => Number(process.env.FREE_CREDITS) || 10,
       min: 0,
     },
 

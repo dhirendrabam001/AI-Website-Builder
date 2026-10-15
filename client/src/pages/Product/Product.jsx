@@ -14,20 +14,20 @@ import { toast } from "react-toastify";
 import {
   AlertTriangle,
   ArrowLeft,
+  Check,
+  ClipboardList,
   Code2,
   Download,
   Eye,
-  Layout,
   Monitor,
-  Palette,
   RefreshCw,
   Rocket,
   Save,
+  ShieldCheck,
   Send,
   Smartphone,
   Sparkles,
   Tablet,
-  Type,
   Undo2,
 } from "lucide-react";
 import { PROJECT_API_END_POINT } from "../../apis/apis";
@@ -35,15 +35,13 @@ import { setUser } from "../../redux/authSlice";
 import { buildPreviewDoc } from "./preview";
 import "./Product.css";
 
-const ACTIVITY = [
-  { label: "Reading your request", Icon: Sparkles },
-  { label: "Planning components & layout", Icon: Layout },
-  { label: "Styling the design", Icon: Palette },
-  { label: "Writing the content", Icon: Type },
-  { label: "Writing React code", Icon: Code2 },
+// the agents the server runs, in order (ids match the events it streams)
+const AGENTS = [
+  { id: "planner", label: "Planner", working: "Planning design & files", Icon: ClipboardList },
+  { id: "builder", label: "Builder", working: "Writing React code", Icon: Code2 },
+  { id: "reviewer", label: "Reviewer", working: "Checking for errors", Icon: ShieldCheck },
 ];
-const ACTIVITY_MS = 4500;
-const AI_TIMEOUT = 150000;
+const AI_TIMEOUT = 240000;
 const MAX_MESSAGE = 20000;
 
 const DEVICES = [
@@ -65,6 +63,64 @@ const api = axios.create({
   withCredentials: true,
   timeout: AI_TIMEOUT,
 });
+
+// POST that reads the server's event stream: agent steps arrive live, then the
+// final result. Errors are shaped like axios errors so `call` handles both alike.
+async function streamPost(path, body, onAgent) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT);
+  const fail = (status, message, code) =>
+    Object.assign(new Error(message), { code, response: { status, data: { message } } });
+
+  try {
+    let res;
+    try {
+      res = await fetch(`${PROJECT_API_END_POINT}${path}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      throw fail(0, "", err.name === "AbortError" ? "ECONNABORTED" : "ERR_NETWORK");
+    }
+
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => ({}));
+      throw fail(res.status, data.message);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let outcome = null;
+
+    while (!outcome) {
+      const { value, done } = await reader.read().catch(() => ({ done: true }));
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const frames = buffer.split("\n\n");
+      buffer = frames.pop();
+      for (const frame of frames) {
+        const event = /^event: (.+)$/m.exec(frame)?.[1];
+        const data = /^data: (.+)$/m.exec(frame)?.[1];
+        if (!event || !data) continue;
+        const payload = JSON.parse(data);
+        if (event === "agent") onAgent?.(payload);
+        else outcome = { event, payload };
+      }
+    }
+
+    if (!outcome) throw fail(0, "The connection was interrupted. Please try again.");
+    if (outcome.event === "failure") {
+      throw fail(outcome.payload.status, outcome.payload.message);
+    }
+    return { data: { data: outcome.payload.data } };
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const slugOf = (title) =>
   title
@@ -153,7 +209,7 @@ export default function Product() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [step, setStep] = useState(0);
+  const [agents, setAgents] = useState([]); // live steps from the server
   const [tab, setTab] = useState("preview");
   const [device, setDevice] = useState("desktop");
   const [dirty, setDirty] = useState(false);
@@ -188,7 +244,7 @@ export default function Product() {
     async (request, { onSuccess, quiet = false } = {}) => {
       setBusy(true);
       setError("");
-      setStep(0);
+      setAgents([]);
       try {
         const res = await request();
         onSuccess?.(res.data.data);
@@ -216,10 +272,18 @@ export default function Product() {
     [navigate, prompt],
   );
 
+  const onAgent = useCallback((event) => {
+    setAgents((list) => {
+      const next = list.filter((a) => a.agent !== event.agent);
+      next.push(event);
+      return next;
+    });
+  }, []);
+
   const generate = useCallback(
     (promptText) => {
       setPending(promptText);
-      return call(() => api.post("/generate", { prompt: promptText }), {
+      return call(() => streamPost("/generate", { prompt: promptText }, onAgent), {
         onSuccess: ({ project: p, aiCredits }) => {
           applyProject(p);
           syncCredits(aiCredits);
@@ -228,7 +292,7 @@ export default function Product() {
         },
       });
     },
-    [call, applyProject, syncCredits, navigate],
+    [call, applyProject, syncCredits, navigate, onAgent],
   );
 
   // First load: open a saved project, or build from the home-page prompt.
@@ -243,16 +307,6 @@ export default function Product() {
       generate(state.prompt.trim());
     }
   }, [hasInput, state, call, generate, applyProject]);
-
-  // cosmetic "agent activity" line: advances while a request runs
-  useEffect(() => {
-    if (!busy) return;
-    const t = setInterval(
-      () => setStep((s) => Math.min(s + 1, ACTIVITY.length - 1)),
-      ACTIVITY_MS,
-    );
-    return () => clearInterval(t);
-  }, [busy]);
 
   const messages = useMemo(() => {
     const list = project ? [...project.messages] : [];
@@ -280,7 +334,7 @@ export default function Product() {
     }
     setText("");
     setPending(message);
-    const ok = await call(() => api.post(`/${project.id}/chat`, { message }), {
+    const ok = await call(() => streamPost(`/${project.id}/chat`, { message }, onAgent), {
       quiet: true,
       onSuccess: ({ project: p, aiCredits }) => {
         applyProject(p);
@@ -329,7 +383,10 @@ export default function Product() {
     }
   };
 
-  const activity = ACTIVITY[Math.min(step, ACTIVITY.length - 1)];
+  const current = agents.find((a) => a.status === "running");
+  const activityLabel = current
+    ? AGENTS.find((a) => a.id === current.agent)?.working
+    : "Starting the agents";
   const sandpackFiles = project ? toSandpackFiles(project.files) : null;
 
   return (
@@ -385,17 +442,7 @@ export default function Product() {
                 </div>
               ))}
 
-              {busy && (
-                <div className="pd-msg is-assistant">
-                  <span className="pd-avatar">
-                    <Sparkles size={13} />
-                  </span>
-                  <p className="pd-activity">
-                    <span className="pd-spin" />
-                    {activity.label}…
-                  </p>
-                </div>
-              )}
+              {busy && <AgentTimeline agents={agents} />}
 
               {error && (
                 <div className="pd-msg is-error">
@@ -568,7 +615,7 @@ export default function Product() {
                         <div className="pd-orb">
                           <Sparkles size={26} />
                         </div>
-                        <strong>{activity.label}…</strong>
+                        <strong>{activityLabel}…</strong>
                         <span className="muted-3">This can take up to a minute</span>
                         {!project && (
                           <div className="pd-ghost">
@@ -689,3 +736,45 @@ function EditorBridge({ baseline, filesRef, onDirty }) {
 
 // files Sandpack's react template adds on its own, which the AI may not have written
 const isTemplateFile = (f) => f.path === "/styles.css";
+
+// Live "who is doing what" list — one row per agent, filled in by server events.
+function AgentTimeline({ agents }) {
+  return (
+    <div className="pd-agents" aria-live="polite">
+      {AGENTS.map(({ id, label, working, Icon }) => {
+        const event = agents.find((a) => a.agent === id);
+        const status = event?.status || "waiting";
+        return (
+          <div key={id} className={`pd-agent is-${status}`}>
+            <span className="pd-agent-icon">
+              {status === "running" ? (
+                <span className="pd-spin" />
+              ) : status === "done" ? (
+                <Check size={14} />
+              ) : (
+                <Icon size={14} />
+              )}
+            </span>
+            <div className="pd-agent-body">
+              <strong>{label}</strong>
+              <span>
+                {status === "running"
+                  ? `${working}…`
+                  : status === "waiting"
+                    ? "Waiting"
+                    : event.detail}
+              </span>
+              {status === "done" && event.items?.length > 0 && (
+                <ul>
+                  {event.items.slice(0, 6).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
